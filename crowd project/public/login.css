@@ -1,0 +1,137 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: sans-serif;
+}
+
+.container-fluid {
+  background-image: url("backlogin.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.mybox {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Blur effect */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Border to enhance the effect */
+  padding: 20px;
+}
+
+input {
+  height: 45px;
+  width: 100%;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  margin-bottom: 15px;
+  padding: 10px;
+}
+
+h1 {
+  color: #381f9f;
+  margin-bottom: 20px;
+}
+
+button {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+button:hover {
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.lbtn {
+  background-image: linear-gradient(-180deg, #37aee2 0%, #1e96c8 100%);
+}
+
+.lbtns {
+  background-color: #1e8449;
+}
+
+i {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+ul {
+  background-color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* Media queries */
+@media (max-width: 670px) {
+  .imgs {
+    height: 40px;
+    border-radius: 50%;
+  }
+  li {
+    list-style: none;
+  }
+  .btns3,
+  .btns2,
+  .btns1 {
+    background-color: black;
+    color: white;
+    height: 30px;
+    width: 40px;
+    font-size: small;
+    padding: 2px 3px 2px 3px;
+    margin-top: 10px;
+  }
+  i {
+    font-size: 20px;
+    color: white;
+  }
+  img {
+    display: none;
+  }
+}
+
+@media (min-width: 671px) {
+  .imgs {
+    height: 45px;
+    border-radius: 50%;
+  }
+  .btns3,
+  .btns2,
+  .btns1 {
+    height: 32px;
+    width: 62px;
+    margin-top: 5px;
+    padding: 4px 8px 8px 8px;
+    background-color: black;
+    color: white;
+  }
+  li {
+    list-style: none;
+    color: white;
+    font-size: large;
+  }
+  li:hover {
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+  }
+  nav {
+    margin-top: 4px;
+  }
+}
+a {
+  text-decoration: none;
+  color: white;
+}
+.section-container {
+  display: flex;
+  flex-direction: row;
+}

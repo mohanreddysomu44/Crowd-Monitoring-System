@@ -1,0 +1,157 @@
+#include <WiFiS3.h>
+#include <Servo.h>
+
+// WiFi Configuration
+const char* ssid = "Redmi Note 11";
+const char* password = "password";
+const char* server = "192.168.97.116";
+const int port = 3000;
+
+// Sensor and Servo Configuration
+const int irSensorEntry = 2;
+const int irSensorExit = 3;
+const int servoEntryPin = 5;
+const int servoExitPin = 6;
+
+// Variables
+Servo entryServo;
+Servo exitServo;
+int currentCount = 0;
+bool entryDetected = false;
+bool exitDetected = false;
+unsigned long lastSendTime = 0;
+const unsigned long sendInterval = 100; // Minimum time between sends (ms)
+
+void setup() {
+  Serial.begin(115200); // Faster serial for debugging
+  
+  // Initialize sensors
+  pinMode(irSensorEntry, INPUT);
+  pinMode(irSensorExit, INPUT);
+  
+  // Attach servos
+  entryServo.attach(servoEntryPin);
+  exitServo.attach(servoExitPin);
+  
+  // Set servos to initial position
+  entryServo.write(0);
+  exitServo.write(0);
+  
+  // Connect to Wi-Fi
+  connectToWiFi();
+}
+
+void loop() {
+  // Check entry sensor (non-blocking)
+  if (digitalRead(irSensorEntry) == HIGH) {
+    if (!entryDetected) {
+      handleEntry();
+      entryDetected = true;
+    }
+  } else {
+    entryDetected = false;
+  }
+  
+  // Check exit sensor (non-blocking)
+  if (digitalRead(irSensorExit) == HIGH) {
+    if (!exitDetected) {
+      handleExit();
+      exitDetected = true;
+    }
+  } else {
+    exitDetected = false;
+  }
+}
+
+void connectToWiFi() {
+  if (WiFi.status() == WL_CONNECTED) return;
+  
+  Serial.println("Connecting to Wi-Fi...");
+  WiFi.begin(ssid, password);
+  
+  unsigned long startTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000) {
+    delay(100);
+    Serial.print(".");
+  }
+  
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\nConnected to WiFi");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\nFailed to connect to WiFi");
+  }
+}
+
+void handleEntry() {
+  Serial.println("Person entered");
+  
+  // Quick servo movement
+  entryServo.write(90);
+  delay(150); // Reduced delay
+  entryServo.write(0);
+  
+  currentCount++;
+  updateCount();
+}
+
+void handleExit() {
+  Serial.println("Person exited");
+  delay(1000);
+  // Quick servo movement
+  exitServo.write(90);
+  delay(4000); // Reduced delay
+  exitServo.write(0);
+  
+  if (currentCount >0) currentCount--;
+  updateCount();
+}
+
+void updateCount() {
+  Serial.print("Current count: ");
+  Serial.println(currentCount);
+  
+  // Send data immediately without delay
+  sendPostRequest(currentCount > 0 ? "entry" : "exit");
+}
+
+void sendPostRequest(String eventType) {
+  if (WiFi.status() != WL_CONNECTED) {
+    connectToWiFi();
+    if (WiFi.status() != WL_CONNECTED) return;
+  }
+
+  WiFiClient client;
+  client.setTimeout(2000); // Reduce timeout from default 1000ms
+
+  if (client.connect(server, port)) {
+    // Create minimal HTTP request
+    String request = 
+      "POST /count HTTP/1.1\r\n"
+      "Host: " + String(server) + "\r\n"
+      "Content-Type: application/json\r\n"
+      "Connection: close\r\n"
+      "Content-Length: ";
+    
+    String jsonBody = "{\"event\":\"" + eventType + "\",\"count\":" + currentCount + "}";
+    request += jsonBody.length();
+    request += "\r\n\r\n";
+    request += jsonBody;
+    
+    // Send the complete request at once
+    client.print(request);
+    
+    // Quickly check for response without waiting too long
+    unsigned long startTime = millis();
+    while (client.connected() && millis() - startTime < 500) {
+      if (client.available()) {
+        client.readStringUntil('\r');
+        break;
+      }
+    }
+    client.stop();
+  } else {
+    Serial.println("Connection failed");
+  }
+}
