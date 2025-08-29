@@ -1,1 +1,0 @@
-this is my facial recognition project starting.This project helps to recognise the face.
